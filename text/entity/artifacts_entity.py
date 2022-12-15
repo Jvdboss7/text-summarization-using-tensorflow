@@ -6,3 +6,8 @@ class DataIngestionArtifacts:
     test_file_path: str
     valid_file_path: str
     data_dict_file_path: str
+    all_dataset_file_path:str
+
+@dataclass
+class DataTransformationArtifacts:
+    raw_datasets: str

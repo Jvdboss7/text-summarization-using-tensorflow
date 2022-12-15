@@ -52,7 +52,8 @@ class DataIngestion:
             data_ingestion_artifact = DataIngestionArtifacts(train_file_path=train_file_path,
                                                              test_file_path=test_file_path,
                                                              valid_file_path=valid_file_path,
-                                                             data_dict_file_path=data_dict_file_path)
+                                                             data_dict_file_path=data_dict_file_path,
+                                                             all_dataset_file_path=self.data_ingestion_config.ALL_DATASET_FILE_PATH)
 
             logging.info("Exited the initiate_data_ingestion method of Data ingestion class")
 
