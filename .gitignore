@@ -130,3 +130,4 @@ dmypy.json
 textenv
 notebooks/final_data
 model
+artifacts
