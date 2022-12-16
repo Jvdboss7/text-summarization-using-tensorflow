@@ -10,4 +10,4 @@ class DataIngestionArtifacts:
 
 @dataclass
 class DataTransformationArtifacts:
-    raw_datasets: str
+    tokenized_datasets: str
