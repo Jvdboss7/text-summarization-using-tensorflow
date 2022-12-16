@@ -22,12 +22,10 @@ class DataTransformationConfig:
     def __init__(self): 
         self.ROOT_DIR: str = os.path.join(os.getcwd(), ARTIFACTS_DIR, DATA_INGESTION_ARTIFACTS_DIR)
         self.DATA_TRANSFORMATION_ARTIFACTS_DIR: str = os.path.join(os.getcwd(),ARTIFACTS_DIR,DATA_TRANSFORMATION_ARTIFACTS_DIR)
-        # self.TRAIN_TRANSFORM_DATA_ARTIFACT_DIR = os.path.join(self.DATA_TRANSFORMATION_ARTIFACTS_DIR,DATA_TRANSFORMATION_TRAIN_DIR,DATA_DIR)
-        # self.TEST_TRANSFORM_DATA_ARTIFACT_DIR = os.path.join(self.DATA_TRANSFORMATION_ARTIFACTS_DIR,DATA_TRANSFORMATION_TEST_DIR,DATA_DIR)
-        # self.TRAIN_TRANSFORM_OBJECT_FILE_PATH = os.path.join(self.TRAIN_TRANSFORM_DATA_ARTIFACT_DIR,
-        #                                                         DATA_TRANSFORMATION_TRAIN_FILE_NAME)
-        # self.TEST_TRANSFORM_OBJECT_FILE_PATH = os.path.join(self.TEST_TRANSFORM_DATA_ARTIFACT_DIR,
-        #                                                         DATA_TRANSFORMATION_TEST_FILE_NAME)
-        self.RAW_DATASET = os.path.join(self.DATA_TRANSFORMATION_ARTIFACTS_DIR)
+        self.RAW_DATASET = os.path.join(self.DATA_TRANSFORMATION_ARTIFACTS_DIR)       
+@dataclass
+class ModelTrainerConfig:
+     def __init__(self):
+        self.TRAINED_MODEL_DIR: str = os.path.join(os.getcwd(), ARTIFACTS_DIR, MODEL_TRAINER_ARTIFACTS_DIR,TRAINED_MODEL_DIR)
+        self.TRAINED_MODEL_PATH = os.path.join(self.TRAINED_MODEL_DIR)
         
-

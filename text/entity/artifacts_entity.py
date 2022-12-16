@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+
 # Data ingestion artifacts
 @dataclass
 class DataIngestionArtifacts:
@@ -8,6 +9,13 @@ class DataIngestionArtifacts:
     data_dict_file_path: str
     all_dataset_file_path:str
 
+# Data Transformation Artifacts
 @dataclass
 class DataTransformationArtifacts:
     tokenized_datasets: str
+
+# Model Trainer artifacts
+@dataclass
+class ModelTrainerArtifacts:
+    trained_model_path: str
+    
