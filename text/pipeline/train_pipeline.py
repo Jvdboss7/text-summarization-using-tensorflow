@@ -48,13 +48,15 @@ class TrainPipeline:
         except Exception as e:
             raise CustomException(e, sys) from e
 
-    def start_model_trainer(self, data_transformation_artifact: DataTransformationArtifacts) -> ModelTrainerArtifacts:
+    def start_model_trainer(self, data_transformation_artifact: DataTransformationArtifacts)-> ModelTrainerArtifacts:
         logging.info(
             "Entered the start_model_trainer method of TrainPipeline class"
         )
         try:
-            model_trainer = ModelTrainer(data_transformation_artifacts=data_transformation_artifact,
-                                        model_trainer_config=self.model_trainer_config
+            model_trainer = ModelTrainer(
+                                        model_trainer_config=self.model_trainer_config,
+                                        data_transformation_artifacts = data_transformation_artifact
+
                                         )
             model_trainer_artifact = model_trainer.initiate_model_trainer()
             logging.info("Exited the start_model_trainer method of TrainPipeline class")
@@ -72,9 +74,14 @@ class TrainPipeline:
                 data_ingestion_artifact=data_ingestion_artifact
             )
 
+            # model_trainer_artifact = self.start_model_trainer(
+            #     data_transformation_artifact=data_transformation_artifact
+            # )
             model_trainer_artifact = self.start_model_trainer(
                 data_transformation_artifact=data_transformation_artifact
             )
+            
+               
 
         except Exception as e:
             raise CustomException(e, sys) from e

@@ -92,7 +92,9 @@ class DataTransformation:
             self.show_random_samples(raw_datasets['train'])
             tokenized_datasets = raw_datasets.map(self.preprocess_function, batched=True)
             tokenized_datasets.save_to_disk(self.data_transformation_config.DATA_TRANSFORMATION_ARTIFACTS_DIR)
-            data_transformation_artifact = DataTransformationArtifacts(tokenized_datasets=tokenized_datasets)
+            # os.makedirs(self.DATA_SET,exist_ok=True)
+            # tokenized_datasets.save_to_disk(self.DATA_SET)
+            data_transformation_artifact = DataTransformationArtifacts(tokenized_datasets=tokenized_datasets,path_tokenized_data =self.data_transformation_config.DATA_TRANSFORMATION_ARTIFACTS_DIR )
             logging.info(f"{data_transformation_artifact}")             
             logging.info("Exited the initiate_data_transfomation function")
             return data_transformation_artifact 

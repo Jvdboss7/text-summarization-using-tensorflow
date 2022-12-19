@@ -11,7 +11,7 @@ from text.entity.config_entity import ModelTrainerConfig
 from transformers import TFAutoModelForSeq2SeqLM, DataCollatorForSeq2Seq
 from text.entity.artifacts_entity import DataTransformationArtifacts, ModelTrainerArtifacts
 class ModelTrainer:
-    def __init__(self, data_transformation_artifacts: DataTransformationArtifacts,
+    def __init__(self,data_transformation_artifacts: DataTransformationArtifacts,
                     model_trainer_config: ModelTrainerConfig):
         """
         :param data_ingestion_artifact: Output reference of data ingestion artifact stage
@@ -23,8 +23,10 @@ class ModelTrainer:
 
     def preparing_train_data(self):
         try:
-            tokenized_datasets = load_from_disk(self.data_transformation_artifacts.tokenized_datasets)
-            
+            # tokenized_datasets = load_from_disk(os.path.join(os.getcwd(),"tokenized_data"))
+            # tokenized_datasets = load_from_disk(os.path.join(os.getcwd(),"artifacts/12_19_2022_12_02_25/DataTransformationArtifacts/" ))
+            print(self.data_transformation_artifacts.tokenized_datasets)
+            tokenized_datasets = load_from_disk(self.data_transformation_artifacts.path_tokenized_data)
             small_train_dataset = tokenized_datasets["train"].shuffle(seed=42).select(range(6000))
             small_validation_dataset = tokenized_datasets["validation"].shuffle(seed=42).select(range(1000))
             small_test_dataset = tokenized_datasets["test"].shuffle(seed=42).select(range(1000))
