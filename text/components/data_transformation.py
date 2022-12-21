@@ -94,7 +94,7 @@ class DataTransformation:
             tokenized_datasets.save_to_disk(self.data_transformation_config.DATA_TRANSFORMATION_ARTIFACTS_DIR)
             # os.makedirs(self.DATA_SET,exist_ok=True)
             # tokenized_datasets.save_to_disk(self.DATA_SET)
-            data_transformation_artifact = DataTransformationArtifacts(tokenized_datasets=tokenized_datasets,path_tokenized_data =self.data_transformation_config.DATA_TRANSFORMATION_ARTIFACTS_DIR )
+            data_transformation_artifact = DataTransformationArtifacts(tokenized_datasets=tokenized_datasets,path_tokenized_data =self.data_transformation_config.PATH_TOKENIZED_DATA )
             logging.info(f"{data_transformation_artifact}")             
             logging.info("Exited the initiate_data_transfomation function")
             return data_transformation_artifact 

@@ -3,26 +3,30 @@ import sys
 import math
 import pandas as pd
 import numpy as np
-from tqdm import tqdm
 from text.constants import *
 from text.logger import logging
+from datasets import load_from_disk
 from text.exception import CustomException
-from text.entity.config_entity import ModelEvaluationConfig
+from text.components.model_trainer import ModelTrainer
+from text.entity.config_entity import ModelEvaluationConfig, ModelTrainerConfig
 from text.entity.artifacts_entity import ModelTrainerArtifacts, DataTransformationArtifacts, ModelEvaluationArtifacts
 from text.configurations.s3_syncer import S3Sync
+from transformers import TFAutoModelForSeq2SeqLM, DataCollatorForSeq2Seq
 
 
 class ModelEvaluation:
 
     def __init__(self, model_evaluation_config:ModelEvaluationConfig,
                 data_transformation_artifacts:DataTransformationArtifacts,
-                model_trainer_artifacts:ModelTrainerArtifacts):
+                model_trainer_artifacts:ModelTrainerArtifacts,
+                ):
 
         self.model_evaluation_config = model_evaluation_config
         self.data_transformation_artifacts = data_transformation_artifacts
         self.model_trainer_artifacts = model_trainer_artifacts
         self.s3 = S3Sync()
         self.bucket_name = BUCKET_NAME
+        self.model_trainer =ModelTrainer(data_transformation_artifacts=DataTransformationArtifacts, model_trainer_config=ModelTrainerConfig())
 
     # @staticmethod
     # def collate_fn(batch):
@@ -51,43 +55,14 @@ class ModelEvaluation:
             if best_model:
                 self.s3.sync_folder_from_s3(folder=self.model_evaluation_config.EVALUATED_MODEL_DIR,bucket_name=self.model_evaluation_config.S3_BUCKET_NAME,bucket_folder_name=self.model_evaluation_config.BUCKET_FOLDER_NAME)
             logging.info("Exited the get_model_from_s3 method of PredictionPipeline class")
-            best_model_path = os.path.join(self.model_evaluation_config.EVALUATED_MODEL_DIR,"model.pt")
+           # best_model_path = os.path.join(self.model_evaluation_config.EVALUATED_MODEL_DIR)
+            best_model_path = TFAutoModelForSeq2SeqLM.from_pretrained(self.model_evaluation_config.EVALUATED_MODEL_DIR)
             return best_model_path
 
         except Exception as e:
             raise CustomException(e, sys) from e
 
-    def evaluate(self, model, dataloader, device):
-        try:
-            model.to(device)
-            all_losses = []
-            all_losses_dict = []
 
-            for images, targets in tqdm(dataloader):
-                images = list(image.to(device) for image in images)
-                targets = [{k: torch.tensor(v).to(device) for k, v in t.items()} for t in targets]
-
-                loss_dict = model(images, targets)  # the model computes the loss automatically if we pass in targets
-                losses = sum(loss for loss in loss_dict.values())
-                loss_dict_append = {k: v.item() for k, v in loss_dict.items()}
-                loss_value = losses.item()
-
-                all_losses.append(loss_value)
-                all_losses_dict.append(loss_dict_append)
-
-                if not math.isfinite(loss_value):
-                    print(f"Loss is {loss_value}, stopping training")  # train if loss becomes infinity
-                    print(loss_dict)
-                    sys.exit(1)
-
-                losses.backward()
-
-            all_losses_dict = pd.DataFrame(all_losses_dict)
-
-            return all_losses_dict, np.mean(all_losses)
-
-        except Exception as e:
-            raise CustomException(e, sys) from e
 
     def initiate_model_evaluation(self) -> ModelEvaluationArtifacts:
         """
@@ -99,53 +74,49 @@ class ModelEvaluation:
         """
 
         try:
-            trained_model = torch.load(self.model_trainer_artifacts.trained_model_path)
+            
+            #tokenized_datasets = load_from_disk(self.data_transformation_artifacts.path_tokenized_data)            
+            # model = self.model_trainer_artifacts.trained_model_path
+            model,train_dataset,validation_dataset,test_dataset = self.model_trainer.preparing_train_data()
+            loss = model.evaluate(test_dataset)
+            print(loss)
+            
 
-            test_dataset = load_object(self.data_transformation_artifacts.transformed_test_object)
+            # trained_model = trained_model.to(DEVICE)
 
-            test_loader = DataLoader(test_dataset,
-                                      batch_size=self.model_evaluation_config.BATCH,
-                                      shuffle=self.model_evaluation_config.SHUFFLE,
-                                      num_workers=self.model_evaluation_config.NUM_WORKERS,
-                                      collate_fn=self.collate_fn
-                                      )
-
-            logging.info("loaded saved model")
-
-            trained_model = trained_model.to(DEVICE)
-
-            all_losses_dict, all_losses = self.evaluate(trained_model, test_loader, device=DEVICE)
+            # all_losses_dict, all_losses = self.evaluate(trained_model, test_loader, device=DEVICE)
 
             os.makedirs(self.model_evaluation_config.EVALUATED_MODEL_DIR, exist_ok=True)
             
-            all_losses_dict.to_csv(self.model_evaluation_config.EVALUATED_LOSS_CSV_PATH, index=False)
+            #loss.to_csv(self.model_evaluation_config.EVALUATED_LOSS_CSV_PATH, index=False)
 
             s3_model = self.get_model_from_s3()
 
             logging.info(f"{s3_model}")
 
             is_model_accepted = False
-            s3_all_losses = None 
+            s3_loss = None 
             print(f"{os.path.isfile(s3_model)}")
             if os.path.isfile(s3_model) is False: 
                 is_model_accepted = True
                 print("s3 model is false and model accepted is true")
-                s3_all_losses = None
+                s3_loss = None
 
             else:
                 print("Entered inside the else condition")
-                s3_model = torch.load(s3_model, map_location=torch.device(DEVICE))
-                print("Model loaded from s3")
-                _, s3_all_losses = self.evaluate(s3_model,test_loader, device=DEVICE)
 
-                if s3_all_losses > all_losses:
-                    print(f"printing the loss inside the if condition{s3_all_losses} and {all_losses}")
+                s3_model =s3_model.evaluate(test_dataset)
+
+                print("Model loaded from s3")
+                s3_loss = model.evaluate(test_dataset)
+
+                if s3_loss > loss:
+                    print(f"printing the loss inside the if condition{s3_loss} and {loss}")
                     # 0.03 > 0.02
                     is_model_accepted = True
                     print("f{is_model_accepted}")
             model_evaluation_artifact = ModelEvaluationArtifacts(
-                        is_model_accepted=is_model_accepted,
-                        all_losses=all_losses)
+                        is_model_accepted=is_model_accepted)
             print(f"{model_evaluation_artifact}")
 
             logging.info("Exited the initiate_model_evaluation method of Model Evaluation class")

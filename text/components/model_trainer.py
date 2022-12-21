@@ -25,8 +25,8 @@ class ModelTrainer:
         try:
             # tokenized_datasets = load_from_disk(os.path.join(os.getcwd(),"tokenized_data"))
             # tokenized_datasets = load_from_disk(os.path.join(os.getcwd(),"artifacts/12_19_2022_12_02_25/DataTransformationArtifacts/" ))
-            print(self.data_transformation_artifacts.tokenized_datasets)
-            tokenized_datasets = load_from_disk(self.data_transformation_artifacts.path_tokenized_data)
+            # print(self.data_transformation_artifacts.tokenized_datasets)
+            tokenized_datasets = load_from_disk(self.model_trainer_config.PATH_TOKENIZED_DATA)
             small_train_dataset = tokenized_datasets["train"].shuffle(seed=42).select(range(6000))
             small_validation_dataset = tokenized_datasets["validation"].shuffle(seed=42).select(range(1000))
             small_test_dataset = tokenized_datasets["test"].shuffle(seed=42).select(range(1000))
@@ -106,7 +106,7 @@ class ModelTrainer:
             logging.info(f"Saved the trained model")
 
             model_trainer_artifacts = ModelTrainerArtifacts(
-                trained_model_path=self.model_trainer_config.TRAINED_MODEL_PATH
+                trained_model_path=self.model_trainer_config.TRAINED_MODEL_PATH,
             )
             logging.info(f"Model trainer artifact: {model_trainer_artifacts}")
 
