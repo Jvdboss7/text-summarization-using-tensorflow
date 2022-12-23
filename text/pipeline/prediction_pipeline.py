@@ -29,7 +29,7 @@ class PredictionPipeline:
         """
         logging.info("Entered the get_model_from_s3 method of PredictionPipeline class")
         try:
-            # Loading the best model from s3 bucket 
+            #Loading the best model from s3 bucket 
             prediction_model_path=os.path.join("PredictModel")
             os.makedirs(prediction_model_path, exist_ok=True)
             s3_sync = S3Sync()
