@@ -131,3 +131,4 @@ textenv
 notebooks/final_data
 model
 artifacts
+PredictModel/
