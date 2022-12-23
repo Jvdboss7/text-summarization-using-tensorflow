@@ -46,6 +46,10 @@ class PredictionPipeline:
 
 
 
+            
+
+
+
     def predict(self,best_model_path,text):
 
         logging.info("Running the predict function")
