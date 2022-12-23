@@ -5,6 +5,7 @@ import pandas as pd
 import numpy as np
 from text.constants import *
 from text.logger import logging
+from transformers import AdamWeightDecay
 from datasets import load_from_disk
 from text.exception import CustomException
 from text.components.model_trainer import ModelTrainer
@@ -39,7 +40,7 @@ class ModelEvaluation:
     #     except Exception as e:
     #         raise CustomException(e, sys) from e
 
-    def get_model_from_s3(self) -> str:
+    def get_model_from_s3(self):
         """
         Method Name :   predict
         Description :   This method predicts the image.
@@ -57,6 +58,7 @@ class ModelEvaluation:
             logging.info("Exited the get_model_from_s3 method of PredictionPipeline class")
            # best_model_path = os.path.join(self.model_evaluation_config.EVALUATED_MODEL_DIR)
             best_model_path = TFAutoModelForSeq2SeqLM.from_pretrained(self.model_evaluation_config.EVALUATED_MODEL_DIR)
+
             return best_model_path
 
         except Exception as e:
@@ -91,13 +93,15 @@ class ModelEvaluation:
             #loss.to_csv(self.model_evaluation_config.EVALUATED_LOSS_CSV_PATH, index=False)
 
             s3_model = self.get_model_from_s3()
-
+            optimizer = AdamWeightDecay(learning_rate=LEARNING_RATE, weight_decay_rate=WEIGHT_DECAY)
+            s3_model.compile(optimizer=optimizer)
             logging.info(f"{s3_model}")
 
             is_model_accepted = False
             s3_loss = None 
-            print(f"{os.path.isfile(s3_model)}")
-            if os.path.isfile(s3_model) is False: 
+            print(f"--------------------------{s3_model}--------------------------------")
+            #print(f"{os.path.isfile(s3_model)}")
+            if s3_model is False: 
                 is_model_accepted = True
                 print("s3 model is false and model accepted is true")
                 s3_loss = None
