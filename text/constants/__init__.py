@@ -28,10 +28,10 @@ MODEL_TRAINER_ARTIFACTS_DIR = 'ModelTrainerArtifacts'
 TRAINED_MODEL_DIR = 'trained_model'
 TRAINED_MODEL_NAME = 'tf_model.h5'
 BATCH_SIZE = 1
-LEARNING_RATE = 2e-5
+LEARNING_RATE = 0.001 #2e-5
 WEIGHT_DECAY = 0.01
 NUM_TRAIN_EPOCHS = 1
-EPOCHS = 1
+EPOCHS = 30
 
 # Model Evaluation constants
 MODEL_EVALUATION_ARTIFACTS_DIR = 'ModelEvaluationArtifacts'
